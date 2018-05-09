@@ -7,7 +7,7 @@
   "scripts": {
     "start": "babel-node ./src/index.js",
     "dev": "nodemon src/* --exec babel-node",
-    "build": "rm -rf dist ; bili --filename index.js",
+    "build": "bili --filename index.js",
     "prepublishOnly": "npm run build"
   },
   "devDependencies": {
