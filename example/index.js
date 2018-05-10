@@ -5,11 +5,24 @@ let moveSystem = {
   system: {},
   methods: {
     update() {
-      let entities = this.engine.get(["Positon", "Velocity"]);
+      let entities = this.engine.get(["Position", "Velocity"]);
       entities.forEach(e => {
         console.log(e);
-        e.Positon.x += e.Velocity.x;
-        e.Positon.y += e.Velocity.y;
+        e.Position.x += e.Velocity.x;
+        e.Position.y += e.Velocity.y;
+      });
+    }
+  }
+};
+
+let recycleSystem = {
+  system: {},
+  methods: {
+    update() {
+      let entities = this.engine.get(["~Components"]);
+      entities.forEach(e => {
+        let cps = [...e["~Components"], "~Components"];
+        this.engine.removeComponents(cps, e);
       });
     }
   }
@@ -19,7 +32,7 @@ let Entities1 = {
   entity: {},
   components: {
     Name: "Entities1",
-    Positon: {
+    Position: {
       x: 1,
       y: 1
     },
@@ -34,7 +47,7 @@ let Entities2 = {
   entity: {},
   components: {
     Name: "Entities2",
-    Positon: {
+    Position: {
       x: 1,
       y: 1
     },
@@ -50,7 +63,7 @@ Mhr.$use({
     ECS
   },
   _run: {
-    moveSystem,
+    Systems: [moveSystem, recycleSystem],
     Entities: [Entities1, Entities2]
   }
 });

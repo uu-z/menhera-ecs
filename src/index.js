@@ -17,14 +17,13 @@ export default {
     },
     entity: {
       _({ cp }) {
+        cp.components.uuid = cp.uuid;
         this.entities.set(cp.uuid, cp);
       }
     },
     components: {
-      _({ cp, _val: components }) {
-        $(components, (k, v) => {
-          this.addComponent(k, cp.uuid);
-        });
+      _({ _val: e }) {
+        this.addComponents(e, e);
       }
     }
   },
@@ -37,14 +36,26 @@ export default {
     update() {
       this.systems.forEach(s => s.update());
     },
-    addComponent(name, id) {
-      if (!this.components.has(name)) this.components.set(name, new Set());
-      this.components.get(name).add(id);
+    addComponents(obj, e) {
+      $(obj, (k, v) => {
+        this.addComponent(k, v, e);
+      });
     },
-    removeComponent(name, id) {
-      let cp = this.components.get(name);
-      if (cp) {
-        cp.delete(id);
+    addComponent(k, v, e) {
+      if (!this.components.has(k)) this.components.set(k, new Set());
+      e[k] = v;
+      this.components.get(k).add(e.uuid);
+    },
+    removeComponents(cps, e) {
+      cps.forEach(cp => {
+        this.removeComponent(cp, e);
+      });
+    },
+    removeComponent(cp, e) {
+      let components = this.components.get(cp);
+      if (components) {
+        if (e[cp]) delete e[cp];
+        components.delete(e.uuid);
       }
     },
     get(cps) {
