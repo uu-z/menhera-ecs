@@ -7,37 +7,24 @@ export default {
   _hooks: {
     data,
     methods,
-    ECS: {
-      _({ _val }) {
-        const { tick = 1000, run } = _val;
-        if (run) {
-          setInterval(() => {
-            this.update();
-          }, tick);
-        }
-      }
-    },
     system: {
       _({ cp }) {
         $set(cp, {
           engine: this
         });
         this.systems.add(cp);
-      },
-      methods
+      }
     },
     entity: {
-      _({ cp, _val }) {
-        const { components } = _val;
-        let entity = {};
-        $set(entity, {
-          uuid: uuid.v1()
-        });
+      _({ cp }) {
+        this.entities.set(cp.uuid, cp);
+      }
+    },
+    components: {
+      _({ cp, _val: components }) {
         $(components, (k, v) => {
-          $set(entity, { [k]: v });
-          this.addComponent(k, entity.uuid);
+          this.addComponent(k, cp.uuid);
         });
-        this.entities.set(entity.uuid, entity);
       }
     }
   },
@@ -48,13 +35,19 @@ export default {
   },
   methods: {
     update() {
-      this.systems.forEach(s => s.update(this));
+      this.systems.forEach(s => s.update());
     },
-    addComponent(name, entity) {
+    addComponent(name, id) {
       if (!this.components.has(name)) this.components.set(name, new Set());
-      this.components.get(name).add(entity);
+      this.components.get(name).add(id);
     },
-    find(cps) {
+    removeComponent(name, id) {
+      let cp = this.components.get(name);
+      if (cp) {
+        cp.delete(id);
+      }
+    },
+    get(cps) {
       let valid = true;
       let entities = new Map();
       let components = cps.map(c => this.components.get(c) || (valid = false));
@@ -65,13 +58,13 @@ export default {
       filter.forEach(id => {
         components.forEach(c => {
           if (!c.has(id)) {
-            filter.remove(id);
+            filter.delete(id);
           }
         });
       });
 
       filter.forEach(id => {
-        entities.set(id, this.entities.get(id));
+        entities.set(id, this.entities.get(id).components);
       });
       return entities;
     }
