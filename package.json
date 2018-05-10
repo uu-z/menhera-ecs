@@ -1,9 +1,11 @@
 {
   "name": "menhera-ecs",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "license": "MIT",
   "main": "dist/index.js",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "start": "babel-node ./src/index.js",
     "dev": "nodemon src/* --exec babel-node",
